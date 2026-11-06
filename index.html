@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link rel="manifest" href="./manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네비게이토 성경 암송</title>
+    <title>이승원 성경 암송</title>
     <style>
         :root {
             --bg-color: #0b1a14; /* 짙은 밤 녹색 배경 */
@@ -206,11 +206,11 @@
 <body>
 
     <header>
-        <h1>네비게이토 성경 암송</h1>
-        <p class="subtitle">그ريس도인의 확신과 성장의 삶 60구절</p>
+        <h1>이승원 성경 암송</h1>
+        <p class="subtitle">나의 삶을 움직이는 성경 암송 구절</p>
     </header>
 
-    <!-- 오늘의 암송 구절 랜덤 뽑기 -->
+    <!-- 오늘의 암송 구절 랜덤 뽑기 -->ㄱ
     <section class="random-section">
         <div class="random-title">✨ 오늘의 암송 구절</div>
         <div class="random-card" id="randomCard">
@@ -332,8 +332,47 @@
     </main>
 
     <footer>
-        <p>© Navigator Bible Memorization. All rights reserved.</p>
+        <p>© My Bible Memorization. All rights reserved.</p>
     </footer>
 
+
+    <!-- 👇 이 부분이 문서 맨 아래에 반드시 있어야 데이터가 작동합니다 -->
+    <script>
+        const bibleVerses = [
+            { ref: "고린도후서 5:17", text: "그런즉 누구든지 그리스도 안에 있으면 새로운 피조물이라 이전 것은 지나갔으니 보라 새 것이 되었도다" },
+            { ref: "갈라디아서 2:20", text: "내가 그리스도와 함께 십자가에 못 박혔나니 그런즉 이제는 내가 사는 것이 아니요 오직 내 안에 그리스도께서 사시는 것이라 이제 내가 육체 가운데 사는 것은 나를 사랑하사 나를 위하여 자기 자신을 버리신 하나님의 아들을 믿는 믿음 안에서 사는 것이라" },
+            { ref: "로마서 12:1", text: "그러므로 형제들아 내가 하나님의 모든 자비하심으로 너희를 권하노니 너희 몸을 하나님이 기뻐하시는 거룩한 산 제물로 드리라 이는 너희가 드릴 영적 예배니라" },
+            { ref: "요한복음 14:21", text: "나의 계명을 지키는 자라야 나를 사랑하는 자니 나를 사랑하는 자는 내 아버지께 사랑을 받을 것이요 나도 그를 사랑하여 그에게 나를 나타내리라" },
+            { ref: "로마서 3:23", text: "모든 사람이 죄를 범하였으매 하나님의 영광에 이르지 못하더니" },
+            { ref: "이사야 53:6", text: "우리는 다 양 같아서 그릇 행하여 각기 제 길로 갔거늘 여호와께서는 우리 모두의 죄악을 그에게 담당시키셨도다" },
+            { ref: "마태복음 6:33", text: "그런즉 너희는 먼저 그의 나라와 그의 의를 구하라 그리하면 이 모든 것을 너희에게 더하시리라" },
+            { ref: "요한복음 13:34-35", text: "새 계명을 너희에게 주노니 서로 사랑하라 내가 너희를 사랑한 것 같이 너희도 서로 사랑하라 너희가 서로 사랑하면 이로써 모든 사람이 너희가 내 제자인 줄 알리라" }
+        ];
+
+        function getRandomVerse() {
+            const card = document.getElementById('randomCard');
+            if(!card) return; // 요소가 없을 때의 예외 처리
+            
+            card.style.opacity = 0;
+            card.style.transform = "translateY(-5px)";
+            
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * bibleVerses.length);
+                const selected = bibleVerses[randomIndex];
+                
+                document.getElementById('randomRef').innerText = selected.ref;
+                document.getElementById('randomText').innerText = selected.text;
+                
+                card.style.opacity = 1;
+                card.style.transform = "translateY(0)";
+            }, 250);
+        }
+
+        // 페이지가 열리자마자 첫 구절을 자동으로 뽑아주는 명령입니다
+        window.addEventListener('DOMContentLoaded', getRandomVerse);
+    </script>
+
+
+    
 </body>
 </html>
