@@ -31,7 +31,7 @@
         }
         header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 16px;
         }
@@ -46,6 +46,60 @@
             color: var(--text-sub);
             margin: 0;
         }
+
+        /* 오늘의 암송 구절 섹션 */
+        .random-section {
+            background-color: rgba(110, 220, 196, 0.06);
+            border: 1px dashed var(--accent-main);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 28px;
+            text-align: center;
+        }
+        .random-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-sub);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .random-card {
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .random-ref {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--accent-main);
+            margin-bottom: 6px;
+        }
+        .random-text {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin: 0 0 14px 0;
+            max-width: 500px;
+        }
+        .random-btn {
+            background-color: var(--card-bg);
+            color: var(--accent-main);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .random-btn:hover {
+            background-color: var(--card-hover);
+            border-color: var(--accent-main);
+        }
+
         /* 대주제 아코디언 */
         details.main-topic {
             background-color: var(--card-bg);
@@ -153,8 +207,18 @@
 
     <header>
         <h1>네비게이토 성경 암송</h1>
-        <p class="subtitle">그리스도인의 확신과 성장의 삶 60구절</p>
+        <p class="subtitle">그ريس도인의 확신과 성장의 삶 60구절</p>
     </header>
+
+    <!-- 오늘의 암송 구절 랜덤 뽑기 -->
+    <section class="random-section">
+        <div class="random-title">✨ 오늘의 암송 구절</div>
+        <div class="random-card" id="randomCard">
+            <div class="random-ref" id="randomRef">로딩 중...</div>
+            <p class="random-text" id="randomText">말씀을 불러오고 있습니다.</p>
+        </div>
+        <button class="random-btn" onclick="getRandomVerse()">🎲 다른 구절 보기</button>
+    </section>
 
     <main>
         <!-- 대주제 A -->
