@@ -233,12 +233,12 @@
     <!-- 👇 구글 시트 실시간 연동이 적용된 스크립트입니다 -->
     <script>
         // 질문자님의 구글 시트 CSV 변환 주소 (1열: 제목, 2열: 장절, 3열: 내용)
-        const sheetUrl = "https://google.com";
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/1T5qXLng8Dv0FmtAH-j2aaf-RsMICiOvMDYWTuBDoIX0/edit?usp=sharing";
         
         // 가져온 성경 구절 데이터를 저장할 전역 배열
         let bibleVerses = [];
 
-        // 구글 시트 데이터를 가져오는 함수
+               // 구글 시트 데이터를 가져오는 함수
         async function fetchSheetData() {
             try {
                 const response = await fetch(sheetUrl);
@@ -246,23 +246,42 @@
                 
                 const data = await response.text();
                 
-                // CSV 행 단위 분리 (줄바꿈 처리)
+                // CSV 행 단위 분리
                 const rows = data.split(/\r?\n/);
                 const fetchedVerses = [];
 
-                // 첫 번째 줄(제목 행: 제목, 장절, 내용)은 건너뛰고 인덱스 1부터 시작
+                // 첫 번째 줄(제목 행)은 건너뛰고 인덱스 1부터 시작
                 for (let i = 1; i < rows.length; i++) {
-                    if (!rows[i].trim()) continue;
+                    const row = rows[i].trim();
+                    if (!row) continue;
 
-                    // 쉼표(,)로 열을 분리하되, 내용 안의 쉼표는 유지하기 위한 정규식 따옴표 처리
-                    const columns = rows[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || rows[i].split(',');
-                    
-                    if (columns && columns.length >= 3) {
-                        // 양 끝 따옴표 및 공백 제거
-                        const clean = (text) => text ? text.replace(/^"|"$/g, '').trim() : '';
-                        
-                        const ref = clean(columns[1]); // 2열: 장절
-                        const text = clean(columns[2]); // 3열: 내용
+                    // 💡 [수정] CSV의 큰따옴표 규칙을 완벽하게 처리하는 파싱 로직
+                    const columns = [];
+                    let insideQuotes = false;
+                    let currentColumn = "";
+
+                    for (let j = 0; j < row.length; j++) {
+                        const char = row[j];
+
+                        if (char === '"') {
+                            // 큰따옴표를 만나면 토글 (따옴표 안의 쉼표는 무시하기 위함)
+                            insideQuotes = !insideQuotes;
+                        } else if (char === ',' && !insideQuotes) {
+                            // 따옴표 밖에서 만난 쉼표만 진짜 열 분리자로 인정
+                            columns.push(currentColumn.trim());
+                            currentColumn = "";
+                        } else {
+                            // 그 외의 문자(따옴표 안의 쉼표 포함)는 글자 그대로 결합
+                            currentColumn += char;
+                        }
+                    }
+                    // 맨 마지막 열 추가
+                    columns.push(currentColumn.trim());
+
+                    // 최소 3개 이상의 열(제목, 장절, 내용)이 정상 분리되었는지 확인
+                    if (columns.length >= 3) {
+                        const ref = columns[1];  // 2열: 장절
+                        const text = columns[2]; // 3열: 내용
 
                         if (ref && text) {
                             fetchedVerses.push({ ref, text });
@@ -272,7 +291,7 @@
 
                 if (fetchedVerses.length > 0) {
                     bibleVerses = fetchedVerses;
-                    getRandomVerse(); // 데이터 로드가 완료되면 첫 구절 뽑기 실행
+                    getRandomVerse(); // 로드 완료 후 첫 구절 뽑기
                 } else {
                     document.getElementById('randomRef').innerText = "데이터 오류";
                     document.getElementById('randomText').innerText = "시트에서 파싱할 수 있는 구절이 없습니다.";
@@ -281,7 +300,7 @@
             } catch (error) {
                 console.error("구글 시트 로드 실패:", error);
                 document.getElementById('randomRef').innerText = "연동 실패";
-                document.getElementById('randomText').innerText = "구글 시트 데이터를 가져오지 못했습니다. 인터넷 연결이나 시트 공유 설정을 확인해주세요.";
+                document.getElementById('randomText').innerText = "구글 시트 데이터를 가져오지 못했습니다.";
             }
         }
 
