@@ -214,11 +214,29 @@
     <section class="random-section">
         <div class="random-title">✨ 오늘의 암송 구절</div>
         <div class="random-card" id="randomCard">
+            <!-- 1. 제목 (장절 위로 배치) -->
+            <div class="random-topic-title" id="randomTitleText" style="font-size: 0.9rem; color: var(--accent-sub); font-weight: 600; margin-bottom: 4px;"></div>
+            <!-- 2. 장절 -->
             <div class="random-ref" id="randomRef">로딩 중...</div>
+            <!-- 3. 내용 -->
             <p class="random-text" id="randomText">말씀을 불러오고 있습니다.</p>
         </div>
         <button class="random-btn" onclick="getRandomVerse()">🎲 다른 구절 보기</button>
+
+        <!-- 💡 버튼 밑에 추가된 3개의 체크박스 영역 -->
+        <div class="toggle-options" style="margin-top: 16px; display: flex; justify-content: center; gap: 16px; font-size: 0.85rem; color: var(--text-sub);">
+            <label style="cursor: pointer; user-select: none;">
+                <input type="checkbox" id="chkTitle" checked onchange="toggleDisplay()" style="accent-color: var(--accent-main); vertical-align: middle; margin-right: 4px;"> 제목
+            </label>
+            <label style="cursor: pointer; user-select: none;">
+                <input type="checkbox" id="chkRef" checked onchange="toggleDisplay()" style="accent-color: var(--accent-main); vertical-align: middle; margin-right: 4px;"> 장절
+            </label>
+            <label style="cursor: pointer; user-select: none;">
+                <input type="checkbox" id="chkText" checked onchange="toggleDisplay()" style="accent-color: var(--accent-main); vertical-align: middle; margin-right: 4px;"> 내용
+            </label>
+        </div>
     </section>
+
 
     <main>
       
@@ -239,77 +257,66 @@
         let bibleVerses = [];
 
                // 구글 시트 데이터를 가져오는 함수
+        
         async function fetchSheetData() {
             try {
                 const response = await fetch(sheetUrl);
-                if (!response.ok) throw new Error("네트워크 응답에 문제가 있습니다.");
+                if (!response.ok) throw new Error("네트워크 응답 실패");
                 
                 const data = await response.text();
-                
-                // CSV 행 단위 분리
                 const rows = data.split(/\r?\n/);
                 const fetchedVerses = [];
 
-                // 첫 번째 줄(제목 행)은 건너뛰고 인덱스 1부터 시작
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i].trim();
                     if (!row) continue;
 
-                    // 💡 [수정] CSV의 큰따옴표 규칙을 완벽하게 처리하는 파싱 로직
                     const columns = [];
                     let insideQuotes = false;
                     let currentColumn = "";
 
                     for (let j = 0; j < row.length; j++) {
                         const char = row[j];
-
                         if (char === '"') {
-                            // 큰따옴표를 만나면 토글 (따옴표 안의 쉼표는 무시하기 위함)
                             insideQuotes = !insideQuotes;
                         } else if (char === ',' && !insideQuotes) {
-                            // 따옴표 밖에서 만난 쉼표만 진짜 열 분리자로 인정
                             columns.push(currentColumn.trim());
                             currentColumn = "";
                         } else {
-                            // 그 외의 문자(따옴표 안의 쉼표 포함)는 글자 그대로 결합
                             currentColumn += char;
                         }
                     }
-                    // 맨 마지막 열 추가
                     columns.push(currentColumn.trim());
 
-                    // 최소 3개 이상의 열(제목, 장절, 내용)이 정상 분리되었는지 확인
+                    // 1열(제목), 2열(장절), 3열(내용)이 정상 파싱되었을 때 모두 수집
                     if (columns.length >= 3) {
-                        const ref = columns[1];  // 2열: 장절
-                        const text = columns[2]; // 3열: 내용
+                        const title = columns[0]; // 1열: 제목
+                        const ref = columns[1];   // 2열: 장절
+                        const text = columns[2];  // 3열: 내용
 
                         if (ref && text) {
-                            fetchedVerses.push({ ref, text });
+                            fetchedVerses.push({ title, ref, text });
                         }
                     }
                 }
 
                 if (fetchedVerses.length > 0) {
                     bibleVerses = fetchedVerses;
-                    getRandomVerse(); // 로드 완료 후 첫 구절 뽑기
+                    getRandomVerse();
                 } else {
                     document.getElementById('randomRef').innerText = "데이터 오류";
-                    document.getElementById('randomText').innerText = "시트에서 파싱할 수 있는 구절이 없습니다.";
                 }
-
             } catch (error) {
-                console.error("구글 시트 로드 실패:", error);
+                console.error("연동 실패:", error);
                 document.getElementById('randomRef').innerText = "연동 실패";
-                document.getElementById('randomText').innerText = "구글 시트 데이터를 가져오지 못했습니다.";
             }
         }
 
-        // 화면에 무작위 구절을 띄워주는 함수
+        // 🎲 다른 구절 보기 함수
         function getRandomVerse() {
             const card = document.getElementById('randomCard');
             if (!card || bibleVerses.length === 0) return;
             
-            // 자연스러운 페이드 아웃 애니메이션
             card.style.opacity = 0;
             card.style.transform = "translateY(-5px)";
             
@@ -317,14 +324,31 @@
                 const randomIndex = Math.floor(Math.random() * bibleVerses.length);
                 const selected = bibleVerses[randomIndex];
                 
+                // 데이터 매핑 (제목이 비어있으면 공백 처리)
+                document.getElementById('randomTitleText').innerText = selected.title || "";
                 document.getElementById('randomRef').innerText = selected.ref;
                 document.getElementById('randomText').innerText = selected.text;
                 
-                // 페이드 인 애니메이션
+                // 구절이 바뀌어도 현재 체크박스 켜짐/꺼짐 상태 유지하기
+                toggleDisplay();
+
                 card.style.opacity = 1;
                 card.style.transform = "translateY(0)";
             }, 250);
         }
+
+        // 💡 체크박스 선택 여부에 따라 화면 요소를 보여주거나 숨기는 함수
+        function toggleDisplay() {
+            const showTitle = document.getElementById('chkTitle').checked;
+            const showRef = document.getElementById('chkRef').checked;
+            const showText = document.getElementById('chkText').checked;
+
+            // display 속성을 제어하여 화면에서 숨기거나 보여줍니다.
+            document.getElementById('randomTitleText').style.display = showTitle ? "block" : "none";
+            document.getElementById('randomRef').style.display = showRef ? "block" : "none";
+            document.getElementById('randomText').style.display = showText ? "block" : "none";
+        }
+
 
         // 페이지가 열리면 자동으로 구글 시트 데이터를 불러옵니다.
         window.addEventListener('DOMContentLoaded', fetchSheetData);
